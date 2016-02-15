@@ -8,20 +8,29 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
 public class FlimsyCowGame extends ApplicationAdapter {
 	SpriteBatch batch;
-	Texture img;
+	//a texture is an image
+	Texture mScreenBackground;
+	Texture mCow;
 	
+	//happens when the app is run
 	@Override
 	public void create () {
 		batch = new SpriteBatch();
-		img = new Texture("badlogic.jpg");
+		mScreenBackground = new Texture("bg.png");
+		mCow = new Texture("bird.png");
+
 	}
 
+	//loops throughout runtime of application
 	@Override
 	public void render () {
-		Gdx.gl.glClearColor(1, 0, 0, 1);
-		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+		//start displaying sprites
 		batch.begin();
-		batch.draw(img, 0, 0);
+		//display the sprite background as a full background
+		batch.draw(mScreenBackground, 0/* x corrdinate*/, 0/*y cordinate*/, Gdx.graphics.getWidth()/*gets full screen width*/, Gdx.graphics.getHeight()/*gets full screen height*/);
+		//draw bird in the middle of the screen
+		batch.draw(mCow,(Gdx.graphics.getWidth()/2)- mCow.getWidth()/2,(Gdx.graphics.getHeight()/2) - mCow.getHeight()/2);
 		batch.end();
+
 	}
 }
