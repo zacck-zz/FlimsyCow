@@ -100,6 +100,7 @@ public class FlimsyCowGame extends ApplicationAdapter {
 
 			}
 
+			//randomly move the tubes up and down while maintaining enough space for the bird to go through using the max offset
 			batch.draw(topTube, Gdx.graphics.getWidth()/2 - topTube.getWidth() / 2, Gdx.graphics.getHeight() / 2 + mGap / 2 + mTubeOffset/*if width and height arent specified use the defaults*/);
 			batch.draw(bottomTube, Gdx.graphics.getWidth() / 2 - bottomTube.getWidth() / 2, Gdx.graphics.getHeight() / 2 - mGap / 2 - bottomTube.getHeight() + mTubeOffset);
 
