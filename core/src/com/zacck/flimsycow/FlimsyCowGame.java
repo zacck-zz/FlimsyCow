@@ -96,7 +96,7 @@ public class FlimsyCowGame extends ApplicationAdapter {
 			{
 				//since velocity moves down if we negate the cow will pop up
 				cowVelocity = -20;
-				mTubeOffset = (mrandomGenerator.nextFloat() - 0.5f) * Gdx.graphics.getHeight() - mGap - 200;
+				mTubeOffset = (mrandomGenerator.nextFloat() - 0.5f) * (Gdx.graphics.getHeight() - mGap - 200);
 
 			}
 
