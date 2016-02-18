@@ -2,12 +2,17 @@ package com.zacck.flimsycow;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.Circle;
+import com.badlogic.gdx.math.Rectangle;
 
 import java.util.Random;
+
 
 
 public class FlimsyCowGame extends ApplicationAdapter {
@@ -37,28 +42,62 @@ public class FlimsyCowGame extends ApplicationAdapter {
 	float mGap = 400;
 	float maxTubeOffset;
 	Random mrandomGenerator;
-	float mTubeOffset;
+	//define number of tubes
+	int mTubeNum = 4;
 	//tubevelocity speed at which tubes move across the screen
 	float mtubeVelocity = 4;
-	float mtubeXPosition;
+	//array of tubue horizontal positions
+	float[] mtubeXPosition = new float[mTubeNum];
+	//distance tubes move up and down
+	float[] mTubeOffset = new float[4];
+	//distance between tubes
+	float mTubeDistance;
+
+	//shapes for collision detections
+	Circle mCowCircle = new Circle();
+	ShapeRenderer mCowShapeRenderer;
+	Rectangle[] mTopTubeRectangles;
+	Rectangle[] mBotomTubeRectangles;
+
+
+
 
 	
 	//happens when the app is run
 	@Override
 	public void create () {
+		//all our sprites
 		batch = new SpriteBatch();
 		mScreenBackground = new Texture("bg.png");
+		mCowShapeRenderer = new ShapeRenderer();
+		mrandomGenerator = new Random();
 
+		//init array of cows
+		mCows = new Texture[2];
 		//init tubes
 		topTube = new Texture("toptube.png");
 		bottomTube = new Texture("bottomtube.png");
-		mtubeXPosition = Gdx.graphics.getWidth() - (topTube.getWidth()/2);
-		//init array of cows
-		mCows = new Texture[2];
+		mTopTubeRectangles = new Rectangle[mTubeNum];
+		mBotomTubeRectangles = new Rectangle[mTubeNum];
+		//setup our 4 tubes
+		for(int i =0; i < mTubeNum; i++)
+		{
+			mTubeOffset[i] = (mrandomGenerator.nextFloat() - 0.5f) * (Gdx.graphics.getHeight() - mGap - 200);
+			//reset tube horizontal position to check the tube is in the middle
+			mtubeXPosition[i] = Gdx.graphics.getWidth() / 2 - topTube.getWidth() / 2 + i * mTubeDistance;//make the first one in the middle then multiply by i to move the tubes away
+			//init rectangles
+			mTopTubeRectangles[i] = new Rectangle();
+			mBotomTubeRectangles[i] = new Rectangle();
+
+		}
+
+
 		mCows[0] = new Texture("bird.png");
 		mCows[1] = new Texture("bird2.png");
 		//set pos of cow
 		cowY = (Gdx.graphics.getHeight()/2)-(mCows[flapState].getHeight()/2);
+		//setup distance of tubes
+		mTubeDistance = Gdx.graphics.getWidth() * 3/4;
 
 
 		///control animation speed of sprite
@@ -76,7 +115,9 @@ public class FlimsyCowGame extends ApplicationAdapter {
 		stubby part of the tube
 		 */
 		maxTubeOffset = Gdx.graphics.getHeight() / 2 - mGap / 2 - 100;
-		mrandomGenerator = new Random();
+
+
+
 
 
 
@@ -100,19 +141,33 @@ public class FlimsyCowGame extends ApplicationAdapter {
 			{
 				//since velocity moves down if we negate the cow will pop up
 				cowVelocity = -20;
-				mTubeOffset = (mrandomGenerator.nextFloat() - 0.5f) * (Gdx.graphics.getHeight() - mGap - 200);
-				//reset tube horizontal position to check the tube is in the middle
-				mtubeXPosition = Gdx.graphics.getWidth() / 2 - topTube.getWidth()/2;
+			}
+			//lets move the tube horizontally in a controlled random way
+			for(int i =0; i < mTubeNum; i++) {
 
+				//this checks if the position of the tube is completely off the screen at which we will push it to the other side
+				if(mtubeXPosition[i] < -topTube.getWidth())
+				{
+					//we willl move the tube to the right by the distance between the tubes times 4 so as to make it appear after the 4th tube
+					mtubeXPosition[i] += mTubeDistance * mTubeNum;
+					//reset offset of tube when it moves to the other side of the screen
+					mTubeOffset[i] = (mrandomGenerator.nextFloat() - 0.5f) * (Gdx.graphics.getHeight() - mGap - 200);
+				}
+				else
+				{
+					//if not off thew edge of the screen we will move it as planned
+					mtubeXPosition[i] = mtubeXPosition[i] - mtubeVelocity;
+				}
+				//randomly move the tubes up and down while maintaining enough space for the bird to go through using the max offset
+				batch.draw(topTube, mtubeXPosition[i], Gdx.graphics.getHeight() / 2 + mGap / 2 + mTubeOffset[i]/*if width and height arent specified use the defaults*/);
+				batch.draw(bottomTube, mtubeXPosition[i], Gdx.graphics.getHeight() / 2 - mGap / 2 - bottomTube.getHeight() + mTubeOffset[i]);
 
+				//shapes or collision detection
+				mTopTubeRectangles[i] = new Rectangle(mtubeXPosition[i],Gdx.graphics.getHeight() / 2 + mGap / 2 + mTubeOffset[i],topTube.getWidth(), topTube.getHeight());
+				mBotomTubeRectangles[i] = new Rectangle(mtubeXPosition[i], Gdx.graphics.getHeight() / 2 - mGap / 2 - bottomTube.getHeight() + mTubeOffset[i],bottomTube.getWidth(),bottomTube.getHeight());
 			}
 
-			//lets move the tube horizontally
-			mtubeXPosition = mtubeXPosition - 4;
 
-			//randomly move the tubes up and down while maintaining enough space for the bird to go through using the max offset
-			batch.draw(topTube, mtubeXPosition, Gdx.graphics.getHeight() / 2 + mGap / 2 + mTubeOffset/*if width and height arent specified use the defaults*/);
-			batch.draw(bottomTube, mtubeXPosition, Gdx.graphics.getHeight() / 2 - mGap / 2 - bottomTube.getHeight() + mTubeOffset);
 
 			//stop the bird going off the screen
 			if(cowY > 0/*this y position being the bottom of the screen */ || cowVelocity < 0)
@@ -139,6 +194,21 @@ public class FlimsyCowGame extends ApplicationAdapter {
 		flap(flapState);
 		//stop displaying sprites
 		batch.end();
+
+		//do collision detection
+		mCowCircle.set(Gdx.graphics.getWidth() / 2, cowY + mCows[flapState].getHeight() / 2, mCows[flapState].getWidth() / 2/*sets the center of the circle to the center of the bird*/);
+
+		mCowShapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+		mCowShapeRenderer.setColor(Color.BLUE);
+		mCowShapeRenderer.circle(mCowCircle.x, mCowCircle.y, mCowCircle.radius);
+
+
+		for(int i = 0;  i < mTubeNum; i++)
+		{
+			mCowShapeRenderer.rect(mtubeXPosition[i],Gdx.graphics.getHeight() / 2 + mGap / 2 + mTubeOffset[i],topTube.getWidth(), topTube.getHeight());
+			mCowShapeRenderer.rect(mtubeXPosition[i], Gdx.graphics.getHeight() / 2 - mGap / 2 - bottomTube.getHeight() + mTubeOffset[i],bottomTube.getWidth(),bottomTube.getHeight());
+		}
+		mCowShapeRenderer.end();
 
 
 
