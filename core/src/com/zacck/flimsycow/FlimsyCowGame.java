@@ -38,6 +38,9 @@ public class FlimsyCowGame extends ApplicationAdapter {
 	float maxTubeOffset;
 	Random mrandomGenerator;
 	float mTubeOffset;
+	//tubevelocity speed at which tubes move across the screen
+	float mtubeVelocity = 4;
+	float mtubeXPosition;
 
 	
 	//happens when the app is run
@@ -49,6 +52,7 @@ public class FlimsyCowGame extends ApplicationAdapter {
 		//init tubes
 		topTube = new Texture("toptube.png");
 		bottomTube = new Texture("bottomtube.png");
+		mtubeXPosition = Gdx.graphics.getWidth() - (topTube.getWidth()/2);
 		//init array of cows
 		mCows = new Texture[2];
 		mCows[0] = new Texture("bird.png");
@@ -97,12 +101,18 @@ public class FlimsyCowGame extends ApplicationAdapter {
 				//since velocity moves down if we negate the cow will pop up
 				cowVelocity = -20;
 				mTubeOffset = (mrandomGenerator.nextFloat() - 0.5f) * (Gdx.graphics.getHeight() - mGap - 200);
+				//reset tube horizontal position to check the tube is in the middle
+				mtubeXPosition = Gdx.graphics.getWidth() / 2 - topTube.getWidth()/2;
+
 
 			}
 
+			//lets move the tube horizontally
+			mtubeXPosition = mtubeXPosition - 4;
+
 			//randomly move the tubes up and down while maintaining enough space for the bird to go through using the max offset
-			batch.draw(topTube, Gdx.graphics.getWidth()/2 - topTube.getWidth() / 2, Gdx.graphics.getHeight() / 2 + mGap / 2 + mTubeOffset/*if width and height arent specified use the defaults*/);
-			batch.draw(bottomTube, Gdx.graphics.getWidth() / 2 - bottomTube.getWidth() / 2, Gdx.graphics.getHeight() / 2 - mGap / 2 - bottomTube.getHeight() + mTubeOffset);
+			batch.draw(topTube, mtubeXPosition, Gdx.graphics.getHeight() / 2 + mGap / 2 + mTubeOffset/*if width and height arent specified use the defaults*/);
+			batch.draw(bottomTube, mtubeXPosition, Gdx.graphics.getHeight() / 2 - mGap / 2 - bottomTube.getHeight() + mTubeOffset);
 
 			//stop the bird going off the screen
 			if(cowY > 0/*this y position being the bottom of the screen */ || cowVelocity < 0)
