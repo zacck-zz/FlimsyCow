@@ -26,6 +26,7 @@ public class FlimsyCowGame extends ApplicationAdapter {
 	Texture bottomTube;
 	//a texture is an image
 	Texture mScreenBackground;
+	Texture gmOver;
 	//array of cows
 	Texture[] mCows;
 	int flapState = 0;
@@ -93,6 +94,7 @@ public class FlimsyCowGame extends ApplicationAdapter {
 		//init tubes
 		topTube = new Texture("toptube.png");
 		bottomTube = new Texture("bottomtube.png");
+		gmOver = new Texture("gmover.png");
 		//lets move them tubes randomly
 		/*
 		This sets the max movement up and down for the tubes so that it can only go
@@ -104,19 +106,7 @@ public class FlimsyCowGame extends ApplicationAdapter {
 		mTubeDistance = Gdx.graphics.getWidth() * 3/4;
 		mTopTubeRectangles = new Rectangle[mTubeNum];
 		mBotomTubeRectangles = new Rectangle[mTubeNum];
-		//setup our 4 tubes
-		for(int i =0; i < mTubeNum; i++)
-		{
-			//reset tube horizontal position to check the tube is in the middle
-			mtubeXPosition[i] = Gdx.graphics.getWidth() / 2 - topTube.getWidth() / 2 + Gdx.graphics.getWidth() + i * mTubeDistance;//make the first one in the middle then multiply by i to move the tubes away
-			mTubeOffset[i] = (mrandomGenerator.nextFloat() - 0.5f) * (Gdx.graphics.getHeight() - mGap - 200);
 
-			//define rectangles for collision detection
-			mTopTubeRectangles[i] = new Rectangle();
-			mBotomTubeRectangles[i] = new Rectangle();
-
-
-		}
 
 
 
@@ -131,6 +121,7 @@ public class FlimsyCowGame extends ApplicationAdapter {
 		cowAnimation = new Animation(0.2f,cowFrames); //this is what we use to control the framerate
 	}
 
+
 	//loops throughout runtime of application
 	@Override
 	public void render () {
@@ -141,7 +132,7 @@ public class FlimsyCowGame extends ApplicationAdapter {
 
 
 		//cow wont fall until user taps screen
-		if(gameState != 0)
+		if(gameState == 1)
 		{
 			//check if tube has gone past bird  to aaward point
 			if(mtubeXPosition[ScoringTube] < Gdx.graphics.getWidth()/2)
@@ -198,18 +189,25 @@ public class FlimsyCowGame extends ApplicationAdapter {
 
 
 			//stop the bird going off the screen
-			if(cowY > 0 || cowVelocity < 0)
+			if(cowY > 0)
 			{
 				//lets now use the tap velocity
 				//make cow fall faster
 				cowVelocity++;
 				cowY -= cowVelocity;
+
+			}
+			else
+			{
+				gameState = 2;
+
 			}
 
 
 
+
 		}
-		else
+		else if (gameState == 0)
 		{
 
 			//detect a tap on screen
@@ -218,11 +216,23 @@ public class FlimsyCowGame extends ApplicationAdapter {
 				gameState = 1;
 			}
 		}
+		else if(gameState == 2)
+		{
+			batch.draw(gmOver, Gdx.graphics.getWidth()/2 - gmOver.getWidth()/2, Gdx.graphics.getHeight()/2 - gmOver.getHeight()/2);
+			//detect a tap on screen
+			if(Gdx.input.justTouched())
+			{
+				gameState = 1;
+				Points = 0;
+				//set pos of cow
+
+			}
+		}
 		//draw bird in the middle of the screen
 		flap(flapState);
 		//stop displaying sprites
 		//draw score
-		mFont.draw(batch, String.valueOf(Points), 100,100);
+		mFont.draw(batch, String.valueOf(Points), 100,300);
 
 		batch.end();
 
@@ -242,12 +252,11 @@ public class FlimsyCowGame extends ApplicationAdapter {
 			if(Intersector.overlaps(mCowCircle,mTopTubeRectangles[i]) || Intersector.overlaps(mCowCircle,mBotomTubeRectangles[i]))
 			{
 				Gdx.app.log("Collission ", "Detected");
+				gameState = 2;
 			}
 
 
 		}
-
-		//mCowShapeRenderer.end();
 
 
 
