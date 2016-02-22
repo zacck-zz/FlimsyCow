@@ -5,6 +5,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
@@ -62,6 +63,11 @@ public class FlimsyCowGame extends ApplicationAdapter {
 	TextureRegion mFrame;
 	float animInterval;
 
+	//Scoring
+	int Points = 0;
+	int ScoringTube = 0;
+	BitmapFont mFont;
+
 
 
 
@@ -76,6 +82,9 @@ public class FlimsyCowGame extends ApplicationAdapter {
 		mScreenBackground = new Texture("bg.png");
 		mCowShapeRenderer = new ShapeRenderer();
 		mrandomGenerator = new Random();
+		mFont = new BitmapFont();
+		mFont.setColor(Color.WHITE);
+		mFont.getData().setScale(10);
 
 		//init array of cows
 		mCows = new Texture[2];
@@ -120,14 +129,6 @@ public class FlimsyCowGame extends ApplicationAdapter {
 		cowFrames[1] = new TextureRegion(mCows[1]);
 		//control speed of frame switching
 		cowAnimation = new Animation(0.2f,cowFrames); //this is what we use to control the framerate
-
-
-
-
-
-
-
-
 	}
 
 	//loops throughout runtime of application
@@ -142,6 +143,23 @@ public class FlimsyCowGame extends ApplicationAdapter {
 		//cow wont fall until user taps screen
 		if(gameState != 0)
 		{
+			//check if tube has gone past bird  to aaward point
+			if(mtubeXPosition[ScoringTube] < Gdx.graphics.getWidth()/2)
+			{
+				Points++;
+				Gdx.app.log("score", Points+"");
+
+				if(ScoringTube < mTubeNum - 1 )
+				{
+					ScoringTube ++;
+				}
+				else
+				{
+					ScoringTube = 0;
+				}
+			}
+
+
 			//this means we are playing the game
 			//detect a tap on screen
 			if(Gdx.input.justTouched())
@@ -164,6 +182,9 @@ public class FlimsyCowGame extends ApplicationAdapter {
 				{
 					//if not off thew edge of the screen we will move it as planned
 					mtubeXPosition[i] = mtubeXPosition[i] - mtubeVelocity;
+
+
+
 				}
 				//randomly move the tubes up and down while maintaining enough space for the bird to go through using the max offset
 				batch.draw(topTube, mtubeXPosition[i], Gdx.graphics.getHeight() / 2 + mGap / 2 + mTubeOffset[i]/*if width and height arent specified use the defaults*/);
@@ -200,6 +221,9 @@ public class FlimsyCowGame extends ApplicationAdapter {
 		//draw bird in the middle of the screen
 		flap(flapState);
 		//stop displaying sprites
+		//draw score
+		mFont.draw(batch, String.valueOf(Points), 100,100);
+
 		batch.end();
 
 
@@ -219,6 +243,7 @@ public class FlimsyCowGame extends ApplicationAdapter {
 			{
 				Gdx.app.log("Collission ", "Detected");
 			}
+
 
 		}
 
